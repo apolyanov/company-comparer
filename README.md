@@ -1,50 +1,182 @@
-# Welcome to your Expo app 👋
+# Company Explorer App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Explore, filter, and sort company data with a responsive and performant React Native application built using Reanimated, TypeScript, and modular components.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Getting Started
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone the repository
 
 ```bash
-npm run reset-project
+git clone https://github.com/your-username/company-comparer.git
+cd company-comparer
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Install dependencies
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### 3. Run the app
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start
+```
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🧠 Core Concepts & Architecture
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Filters
+
+```ts
+interface Filters {
+  filters: Filter[]
+  sortBy: SortableKey | null
+  sortDirection: SortDirection | null
+  query?: string | null
+}
+```
+
+### Defining Filters
+
+```ts
+export function defineFilter<Value>(
+  matchFn: FilterFunction<Value>,
+  id: string
+): {
+  id: string
+  getFilter: (
+    value: Value,
+    generateId?: (value: Value) => string
+  ) => Filter<Value>
+}
+```
+
+Examples:
+
+```ts
+export const YearFilter = defineFilter<number>(
+  (item, value) => item.founded_year === value,
+  'year'
+)
+
+export const RevenueMinFilter = defineFilter<number>(
+  (item, value) => getRevenue(item) > value,
+  'revenue-min'
+)
+```
+
+### Primitive Comparator
+
+```ts
+export function definePrimitiveComparator<
+  Item,
+  Value extends string | number | boolean | null | undefined
+>(getValue: (item: Item) => Value) {
+  return (direction: SortDirection) => (a: Item, b: Item) => {
+    const aValue = getValue(a)
+    const bValue = getValue(b)
+
+    if (aValue === bValue) return 0
+    if (aValue == null) return 1
+    if (bValue == null) return -1
+
+    let result: number
+    let shouldReverse = false
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      result = aValue.localeCompare(bValue)
+      shouldReverse = direction === SortDirection.Desc
+    } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+      result = Number(aValue) - Number(bValue)
+      shouldReverse = direction === SortDirection.Desc
+    } else {
+      result = (aValue as number) - (bValue as number)
+      // For numeric types, reverse for **Asc** instead of Desc to get high-to-low
+      shouldReverse = direction === SortDirection.Asc
+    }
+
+    return shouldReverse ? -result : result
+  }
+}
+```
+
+---
+
+## 🔍 Advanced Search
+
+### Supported Syntax
+
+```txt
+industry:Tech revenue>5000000 size:Large
+```
+
+### Parsing Search
+
+- Uses a custom parser to split advanced conditions from free text.
+- Converts them into filters using existing `defineFilter` logic.
+- Return the filters and the cleaned text for free search
+
+```ts
+function parseQueryToFilters(query: string): ParsedQuery
+```
+
+---
+
+## ⚙️ Filtering and Sorting Logic
+
+```ts
+export function filterAndSortCompanies(
+  companies: CompanyFullInfo[],
+  filterConfig: Filters
+): CompanyFullInfo[]
+```
+
+---
+
+## 📱 Flyout Behavior
+
+- Uses Reanimated for open/close slide animations
+- ScrollView to prevent height overflow
+- Tapping outside closes the flyout
+
+---
+
+## 🧵 `useEventCallback` Hook
+
+### Overview
+
+`useEventCallback` is a custom React hook that returns a stable event callback function whose reference never changes between renders, but always invokes the latest version of the handler.
+
+This is useful when working with timers, gestures, animations, or any async event logic where you need the latest closure without causing re-renders.
+
+### Example Usage
+
+```ts
+const onPress = useEventCallback(() => {
+  console.log('Latest handler reference')
+})
+```
+
+### Implementation
+
+```ts
+export function useEventCallback<T extends (...args: any[]) => any>(
+  handler: T
+) {
+  const handlerRef = useRef<T>(handler)
+
+  handlerRef.current = handler
+
+  return useCallback((...args: Parameters<T>): ReturnType<T> => {
+    return handlerRef.current(...args)
+  }, [])
+}
+```
+
+## 📃 License
+
+MIT
