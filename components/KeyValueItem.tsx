@@ -1,9 +1,10 @@
-import { memo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { memo } from 'react'
+import { StyleSheet, View } from 'react-native'
+import { Typography } from './Typography'
 
 export interface KeyValueItemProps {
-  keyText: string;
-  valueText: string | number;
+  keyText: string
+  valueText: string | number
 }
 
 export const KeyValueItem = memo(function KeyValueItem(
@@ -11,17 +12,17 @@ export const KeyValueItem = memo(function KeyValueItem(
 ) {
   return (
     <View style={styles.container}>
-      <Text>{props.keyText}</Text>
-      <Text>{props.valueText}</Text>
+      <Typography>{props.keyText}</Typography>
+      <Typography>{props.valueText}</Typography>
     </View>
-  );
-});
+  )
+})
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingVertical: 2,
     gap: 8,
   },
-});
+})

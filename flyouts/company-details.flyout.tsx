@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   container: {
-    gap: 16,
+    gap: 32,
   },
   actionButton: {
     flex: 1,

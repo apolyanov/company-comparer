@@ -1,7 +1,7 @@
-import { useEventCallback } from '@/hooks'
-import { debounce } from '@/utils/utils'
+import { useEventCallback, useTheme } from '@/hooks'
+import { debounce } from '@/utils'
 import React, { memo, useMemo, useState } from 'react'
-import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, View } from 'react-native'
 import {
   Gesture,
   GestureDetector,
@@ -12,6 +12,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated'
+import { Typography } from './Typography'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 const SLIDER_PADDING = 32
@@ -27,6 +28,8 @@ interface MultiSliderProps {
 }
 
 export const MultiSlider = memo(function MultiSlider(props: MultiSliderProps) {
+  const theme = useTheme()
+
   const [minValue, maxValue] = props.initialValues
   const initialLeft =
     ((minValue - props.min) / (props.max - props.min)) * SLIDER_WIDTH
@@ -98,6 +101,49 @@ export const MultiSlider = memo(function MultiSlider(props: MultiSliderProps) {
     width: right.value - left.value,
   }))
 
+  const styles = useMemo(() => {
+    return StyleSheet.create({
+      container: {
+        flex: 1,
+        justifyContent: 'center',
+      },
+      sliderTrackContainer: {
+        height: THUMB_SIZE,
+        justifyContent: 'center',
+      },
+      track: {
+        position: 'absolute',
+        height: 4,
+        width: SLIDER_WIDTH,
+        backgroundColor: theme.colors.border.main,
+        borderRadius: 2,
+      },
+      activeTrack: {
+        position: 'absolute',
+        height: 4,
+        backgroundColor: theme.colors.accent.main,
+        borderRadius: 2,
+      },
+      thumb: {
+        position: 'absolute',
+        width: THUMB_SIZE,
+        height: THUMB_SIZE,
+        borderRadius: THUMB_SIZE / 2,
+        backgroundColor: theme.colors.accent.main,
+      },
+      labelRow: {
+        marginTop: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      },
+      label: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: theme.colors.text.primary,
+      },
+    })
+  }, [theme])
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.sliderTrackContainer}>
@@ -114,54 +160,13 @@ export const MultiSlider = memo(function MultiSlider(props: MultiSliderProps) {
       </View>
 
       <View style={styles.labelRow}>
-        <Text style={styles.label}>
+        <Typography style={styles.label}>
           {props.formatValue?.(localMin) ?? localMin}
-        </Text>
-        <Text style={styles.label}>
+        </Typography>
+        <Typography style={styles.label}>
           {props.formatValue?.(localMax) ?? localMax}
-        </Text>
+        </Typography>
       </View>
     </GestureHandlerRootView>
   )
-})
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  sliderTrackContainer: {
-    height: THUMB_SIZE,
-    justifyContent: 'center',
-  },
-  track: {
-    position: 'absolute',
-    height: 4,
-    width: SLIDER_WIDTH,
-    backgroundColor: '#ddd',
-    borderRadius: 2,
-  },
-  activeTrack: {
-    position: 'absolute',
-    height: 4,
-    backgroundColor: '#000',
-    borderRadius: 2,
-  },
-  thumb: {
-    position: 'absolute',
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    borderRadius: THUMB_SIZE / 2,
-    backgroundColor: '#000',
-  },
-  labelRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
 })

@@ -9,7 +9,7 @@ import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
 import { FlyoutCenter } from '@/components'
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useColorScheme } from '@/hooks'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export default function RootLayout() {

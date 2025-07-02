@@ -1,5 +1,5 @@
-import { Button } from '@/components'
-import { useEventCallback } from '@/hooks'
+import { Button, Typography } from '@/components'
+import { useEventCallback, useTheme } from '@/hooks'
 import { FlyoutContentBaseProps, SortDirection } from '@/types'
 import { registerFlyout } from '@/utils'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { memo } from 'react'
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   TouchableOpacityProps,
   View,
@@ -33,13 +32,17 @@ interface DropdownFlyoutContentProps {
 const DropdownOptionEntry = memo(function DropdownOption(
   props: DropdownOptionProps
 ) {
+  const theme = useTheme()
+
   return (
     <TouchableOpacity
       onPress={props.onPress}
       style={dropdownOptionStyles.container}
     >
-      <Text>{props.label}</Text>
-      {props.active ? <FontAwesomeIcon icon={faCheck} /> : null}
+      <Typography>{props.label}</Typography>
+      {props.active ? (
+        <FontAwesomeIcon icon={faCheck} color={theme.colors.text.primary} />
+      ) : null}
     </TouchableOpacity>
   )
 })

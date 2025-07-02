@@ -1,5 +1,5 @@
 import { CompanyInfoLabels, GeneralInfoKeys } from '@/constants'
-import { useEventCallback } from '@/hooks'
+import { useEventCallback, useTheme } from '@/hooks'
 import { CompanyFullInfo } from '@/types'
 import { memo, useMemo } from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
@@ -15,6 +15,8 @@ interface CompanyListItemProps {
 export const CompanyListItem = memo(function CompanyListItem(
   props: CompanyListItemProps
 ) {
+  const theme = useTheme()
+
   const generalSectionRows = useMemo<KeyValueItemProps[]>(() => {
     return GeneralInfoKeys.map((key) => ({
       keyText: CompanyInfoLabels[key],
@@ -26,8 +28,21 @@ export const CompanyListItem = memo(function CompanyListItem(
     props.onPress(props.item)
   })
 
+  const containerStyle = useMemo(
+    () => [
+      styles.container,
+      {
+        borderColor: theme.colors.border.main,
+        backgroundColor: theme.colors.background.surface,
+        padding: theme.spacing.md,
+        borderRadius: theme.borderRadius.lg,
+      },
+    ],
+    [theme]
+  )
+
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity style={containerStyle} onPress={onPress}>
       <CompanyListItemDataSection
         title={`General - ${props.item.name}`}
         rows={generalSectionRows}
@@ -40,11 +55,6 @@ export const CompanyListItem = memo(function CompanyListItem(
 const styles = StyleSheet.create({
   container: {
     borderWidth: 1,
-    padding: 16,
-    gap: 16,
-    borderRadius: 32,
-  },
-  title: {
-    fontSize: 24,
+    gap: 32,
   },
 })

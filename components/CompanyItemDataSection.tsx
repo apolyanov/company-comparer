@@ -1,6 +1,7 @@
 import { memo } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { KeyValueItem, KeyValueItemProps } from './KeyValueItem'
+import { Typography } from './Typography'
 
 interface CompanyListItemDataSectionProps {
   title: string
@@ -11,7 +12,7 @@ export const CompanyListItemDataSection = memo(
   function CompanyListItemDataSection(props: CompanyListItemDataSectionProps) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>{props.title}</Text>
+        <Typography style={styles.title}>{props.title}</Typography>
         {props.rows.map((row) => (
           <KeyValueItem
             key={`${row.keyText}-${row.valueText}`}

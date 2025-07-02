@@ -1,5 +1,5 @@
 import { CompanyInfoLabels, SortByKeys } from '@/constants'
-import { DropdownFlyout } from '@/flyouts'
+import { DropdownFlyout } from '@/flyouts/dropdown.flyout'
 import { useEventCallback } from '@/hooks'
 import { BaseFilterComponentProps, SortableKeys, SortDirection } from '@/types'
 import { memo } from 'react'
@@ -41,11 +41,13 @@ export const SortDirectionSelector = memo(function SortDirectionSelector(
           style={{ flex: 1 }}
           onPress={onPressSort(SortDirection.Asc)}
           label="High to low"
+          active={props.filters.sortDirection === SortDirection.Asc}
         />
         <Tag
           style={{ flex: 1 }}
           onPress={onPressSort(SortDirection.Desc)}
           label="Low to high"
+          active={props.filters.sortDirection === SortDirection.Desc}
         />
       </View>
     </>

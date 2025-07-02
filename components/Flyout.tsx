@@ -1,4 +1,4 @@
-import { useArchListener, useEventCallback } from '@/hooks'
+import { useArchListener, useEventCallback, useTheme } from '@/hooks'
 import { closeFlyout } from '@/utils'
 import React, {
   memo,
@@ -46,6 +46,7 @@ const MAX_HEIGHT = SCREEN_HEIGHT * 0.9
 export const Flyout = memo(function Flyout(
   props: PropsWithChildren<FlyoutProps>
 ) {
+  const theme = useTheme()
   const didOpen = useRef(false)
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null)
 
@@ -76,11 +77,13 @@ export const Flyout = memo(function Flyout(
     zIndex: 100 + props.layer,
     padding: 16,
     maxHeight: MAX_HEIGHT,
+    backgroundColor: theme.colors.background.surface,
   }))
 
   const overlayStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     zIndex: 100 + props.layer,
+    backgroundColor: theme.colors.background.overlay,
   }))
 
   const close = useEventCallback(() => {
@@ -105,9 +108,7 @@ export const Flyout = memo(function Flyout(
 
   return (
     <>
-      <Animated.View
-        style={[StyleSheet.absoluteFill, overlayStyle, styles.overlay]}
-      >
+      <Animated.View style={[StyleSheet.absoluteFill, overlayStyle]}>
         <Pressable onPress={close} style={StyleSheet.absoluteFillObject} />
       </Animated.View>
       <Animated.View style={[styles.container, animatedStyle]}>
@@ -131,12 +132,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'white',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-  },
-  overlay: {
-    backgroundColor: 'black',
   },
   titleContainer: {
     alignItems: 'center',
