@@ -1,75 +1,118 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import {
+  CompanyListItem,
+  SafeAreaView,
+  SearchInput,
+  Typography,
+} from '@/components'
+import { generateCompanies } from '@/data'
+import { CompanyDetailsFlyout, FiltersFlyout } from '@/flyouts'
+import { useEventCallback, useFilters } from '@/hooks'
+import { CompanyFullInfo, Filters } from '@/types'
+import { filterAndSortCompanies } from '@/utils'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  FlatList,
+  Keyboard,
+  ListRenderItemInfo,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native'
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+} from 'react-native-reanimated'
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const InitialCompanies = generateCompanies(200)
+
+function keyExtractor(item: CompanyFullInfo) {
+  return item.id
+}
+
+const isWeb = Platform.OS === 'web'
 
 export default function HomeScreen() {
+  const [companies, setCompanies] =
+    useState<CompanyFullInfo[]>(InitialCompanies)
+  const [filters, setFilters] = useFilters()
+
+  const renderItem = useCallback(
+    (data: ListRenderItemInfo<CompanyFullInfo>) => {
+      return (
+        <Animated.View
+          entering={!isWeb ? FadeIn.duration(150) : undefined}
+          exiting={!isWeb ? FadeOut.duration(150) : undefined}
+          layout={!isWeb ? LinearTransition.springify() : undefined}
+        >
+          <CompanyListItem
+            item={data.item}
+            onPress={(item: CompanyFullInfo) => {
+              CompanyDetailsFlyout.open(item)
+            }}
+          />
+        </Animated.View>
+      )
+    },
+    []
+  )
+
+  const onApplyFilters = useEventCallback((filters: Filters) => {
+    setFilters(filters)
+  })
+
+  const onPressFilters = useEventCallback(() => {
+    Keyboard.dismiss()
+    FiltersFlyout.open({ filters, onApplyFilters })
+  })
+
+  const onChangeText = useEventCallback((query: string) => {
+    if (query.length >= 3) {
+      setFilters((prev) => ({ ...prev, query }))
+      return
+    }
+
+    setFilters((prev) =>
+      prev.query !== null ? { ...prev, query: null } : prev
+    )
+  })
+
+  useEffect(() => {
+    setCompanies(filterAndSortCompanies(InitialCompanies, filters))
+  }, [filters])
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView>
+      <View style={styles.container}>
+        <SearchInput
+          onPressFilters={onPressFilters}
+          onChangeText={onChangeText}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+        <FlatList
+          data={companies}
+          renderItem={renderItem}
+          contentContainerStyle={styles.flatlist}
+          keyExtractor={keyExtractor}
+          initialNumToRender={15}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Typography>No results found</Typography>
+            </View>
+          }
+        />
+      </View>
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: { padding: 16, gap: 16, flex: 1 },
+  flatlist: { gap: 16 },
+  emptyContainer: {
+    padding: 32,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+})

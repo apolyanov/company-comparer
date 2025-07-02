@@ -1,0 +1,1 @@
+export { generateCompanies } from "./companies";
