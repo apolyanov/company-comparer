@@ -9,7 +9,7 @@ Explore, filter, and sort company data with a responsive and performant React Na
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/company-comparer.git
+git clone https://github.com/apolyanov/company-comparer.git
 cd company-comparer
 ```
 
